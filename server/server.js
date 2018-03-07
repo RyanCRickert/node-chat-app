@@ -9,17 +9,25 @@ const port = process.env.PORT || 3000;
 var server = http.createServer(app);
 var io = socketIO(server);
 
+var {generateMessage} = require("./utils/message");
+
 app.use(express.static(publicPath));
 
 io.on("connection", (socket) => {
 	console.log("New user connected");
+	var user = "New user";
+
+	socket.emit("newMessage", generateMessage("Admin", "Welcome to the chat, please be respectful"))
+
+	socket.broadcast.emit("newMessage", generateMessage("Admin", `${user} joined`));
 
 	socket.on("createMessage", (message) => {
 		io.emit("newMessage", {
 			from: message.from,
 			text: message.text,
 			createdAt: new Date().getTime()
-		})
+		});
+
 	});
 
 	socket.on("disconnect", () => {
